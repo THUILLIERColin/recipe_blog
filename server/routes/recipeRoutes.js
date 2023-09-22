@@ -7,7 +7,8 @@ const recipeController = require('../controllers/recipeController.js');
 */
 router.get('/', recipeController.homepage);
 router.get('/categories', recipeController.exploreCategories);
-
+// router.get('/recipes/', recipeController.exploreRecipes);
+router.get('/recipe/:id', recipeController.myRecipe);
 
 
 module.exports = router;

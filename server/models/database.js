@@ -7,3 +7,4 @@ db.once('open', () => console.log('Connected to MongoDB'));
 
 // Models 
 require('./Category');
+require('./Recipe');
