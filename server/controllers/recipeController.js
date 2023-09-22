@@ -27,7 +27,7 @@ exports.homepage = async (req, res) => {
     } catch (error) {
         res.satus(500).send({ message : error.message || "Erreur inconue"});
     }
-};
+}
 
 /**
  * GET /categories
@@ -44,7 +44,7 @@ exports.exploreCategories = async (req, res) => {
     } catch (error) {
         res.satus(500).send({ message : error.message || "Erreur inconue"});
     }
-};
+}
 
 /*
 * GET /recipes/:id
@@ -54,13 +54,29 @@ exports.myRecipe = async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id);
         res.render('recipe', { 
+            title : 'Recette',
             recipe
         });
     } catch (error) {
         res.satus(500).send({ message : error.message || "Erreur inconue"});
     }
-};
+}
 
+/**
+ * GET /categories/:id
+ * Categories By Id
+ */
+
+exports.exploreCategoriesById = async(req, res) => { 
+    try {
+        let categoryId = req.params.id;
+        const limitNumber = 20;
+        const categoryById = await Recipe.find({ 'category': categoryId }).limit(limitNumber);
+        res.render('categories', { title: 'Catégories', categoryById, categoryId} );
+    } catch (error) {
+      res.satus(500).send({message: error.message || "Error Occured" });
+    }
+} 
 
 
 
