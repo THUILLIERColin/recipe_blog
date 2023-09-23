@@ -25,7 +25,7 @@ exports.homepage = async (req, res) => {
             food
         });
     } catch (error) {
-        res.satus(500).send({ message : error.message || "Erreur inconue"});
+        res.status(500).send({ message : error.message || "Erreur inconue"});
     }
 }
 
@@ -42,7 +42,7 @@ exports.exploreCategories = async (req, res) => {
             categories
         });
     } catch (error) {
-        res.satus(500).send({ message : error.message || "Erreur inconue"});
+        res.status(500).send({ message : error.message || "Erreur inconue"});
     }
 }
 
@@ -58,7 +58,7 @@ exports.myRecipe = async (req, res) => {
             recipe
         });
     } catch (error) {
-        res.satus(500).send({ message : error.message || "Erreur inconue"});
+        res.status(500).send({ message : error.message || "Erreur inconue"});
     }
 }
 
@@ -74,10 +74,23 @@ exports.exploreCategoriesById = async(req, res) => {
         const categoryById = await Recipe.find({ 'category': categoryId }).limit(limitNumber);
         res.render('categories', { title: 'Catégories', categoryById, categoryId} );
     } catch (error) {
-      res.satus(500).send({message: error.message || "Error Occured" });
+      res.status(500).send({message: error.message || "Error Occured" });
     }
-} 
+}
 
+/**
+ * POST /search
+ * Search 
+*/
+exports.searchRecipe = async(req, res) => {
+  try {
+    let searchTerm = req.body.searchTerm;
+    let recipe = await Recipe.find( { $text: { $search: searchTerm, $diacriticSensitive: true } });
+    res.render('search', { title: 'Cooking Blog - Search', recipe } );
+  } catch (error) {
+    res.status(500).json(error)
+  }
+}
 
 
 
@@ -136,40 +149,3 @@ exports.exploreCategoriesById = async(req, res) => {
 // }
 
 // insertDymmyCategoryData();
-
-/*
- async function insertDymmyRecipeData(){
-   try {
-     await Recipe.insertMany([
-       { 
-         "name": "Recipe Name Goes Here",
-         "description": `Recipe Description Goes Here`,
-         "email": "recipeemail@raddy.co.uk",
-         "ingredients": [
-           "1 level teaspoon baking powder",
-           "1 level teaspoon cayenne pepper",
-           "1 level teaspoon hot smoked paprika",
-         ],
-         "category": "American", 
-         "image": "southern-friend-chicken.jpg"
-       },
-       { 
-         "name": "Recipe Name Goes Here",
-         "description": `Recipe Description Goes Here`,
-         "email": "recipeemail@raddy.co.uk",
-         "ingredients": [
-           "1 level teaspoon baking powder",
-           "1 level teaspoon cayenne pepper",
-           "1 level teaspoon hot smoked paprika",
-         ],
-         "category": "American", 
-         "image": "southern-friend-chicken.jpg"
-       },
-     ]);
-     console.log('Recipe Data Inserted');
-   } catch (error) {
-     console.log('err', + error)
-   }
- }
-
- insertDymmyRecipeData();*/
