@@ -55,7 +55,8 @@ exports.myRecipe = async (req, res) => {
             recipe
         });
     } catch (error) {
-        res.status(500).send({ message : error.message || "Erreur inconue"});
+        res.render('layouts/404');
+        // res.status(500).send({ message : error.message || "Erreur inconue"});
     }
 }
 
@@ -71,7 +72,7 @@ exports.exploreCategoriesById = async(req, res) => {
         const categoryById = await Recipe.find({ 'category': categoryId }).limit(limitNumber);
         res.render('categories', { title: 'Catégories', categoryById, categoryId} );
     } catch (error) {
-      res.status(500).send({message: error.message || "Error Occured" });
+        res.render('layouts/404');
     }
 }
 
