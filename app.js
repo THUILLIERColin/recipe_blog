@@ -1,10 +1,10 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-require('dotenv').config();
 
 app.use(express.urlencoded( { extended: true } ));
 app.use(express.static('public'));

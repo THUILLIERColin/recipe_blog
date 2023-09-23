@@ -9,15 +9,12 @@ const Recipe = require('../models/Recipe');
 exports.homepage = async (req, res) => {
     try {
         
-        const limitNumber = 5; 
-        const categories = await Category.find().limit(limitNumber);
+        const limitNumber = 15; 
+        const limitNumberCategory = 5;
+        const categories = await Category.find().sort({ _id: -1 }).limit(limitNumberCategory);
         const latest = await Recipe.find().sort({ _id: -1 }).limit(limitNumber);
 
-        const italien = await Recipe.find({ category: 'Italien' }).sort({ _id: -1 }).limit(limitNumber);
-        const american = await Recipe.find({ category: 'American' }).sort({ _id: -1 }).limit(limitNumber);
-        const chinese = await Recipe.find({ category: 'Chinese' }).sort({ _id: -1 }).limit(limitNumber);
-
-        const food = { latest , italien, american, chinese };
+        const food = { latest };
     
         res.render('index', { 
             title : 'Accueil',
