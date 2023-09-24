@@ -90,6 +90,19 @@ exports.searchRecipe = async(req, res) => {
   }
 }
 
+/**
+ * GET /explore-latest
+ * Explore Latest
+ */
+exports.exploreLatest = async(req, res) => {
+    try {
+        const limitNumber = 20;
+        const latest = await Recipe.find().sort({ _id: -1 }).limit(limitNumber);
+        res.render('explore-latest', { title: 'Cooking Blog - Explore Latest', latest } );
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
 
 
 

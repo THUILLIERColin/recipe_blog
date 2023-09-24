@@ -11,6 +11,7 @@ router.get('/recipe/:id', recipeController.myRecipe);
 router.get('/categories', recipeController.exploreCategories);
 router.get('/categories/:id', recipeController.exploreCategoriesById);
 router.post('/search', recipeController.searchRecipe);
+router.get('/explore-latest', recipeController.exploreLatest);
 
 // Erreur 404 chargement de la page 404.ejs
 
