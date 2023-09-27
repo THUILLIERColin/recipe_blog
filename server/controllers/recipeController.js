@@ -120,6 +120,70 @@ exports.randomRecipe = async(req, res) => {
 }
 
 
+/**
+ * GET /submit-recipe
+ * Submit Recipe
+ */
+exports.submitRecipe = async(req, res) => {
+    try {
+        const infoErrorsObj = req.flash('infoErrors');
+        const infoSubmitObj = req.flash('infoSubmit');
+        const categories = await Category.find();
+        res.render('submit-recipe', { title: 'Cooking Blog - Submit Recipe', categories, infoErrorsObj, infoSubmitObj } );
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+/**
+ * POST /submit-recipe
+ * Submit Recipe Post
+ */
+exports.submitRecipePost = async(req, res) => {
+    try {
+
+        let imageUploadFile;
+        let uploadPath; 
+        let newImageName;
+
+        if (!req.files || Object.keys(req.files).length === 0) {
+            req.flash('infoErrors', "Erreur : Aucun fichier n'a été envoyé")
+            // return res.redirect('/submit-recipe');
+        } else {
+            imageUploadFile = req.files.image;
+            newImageName = Date.now() + imageUploadFile.name;
+
+            uploadPath = require('path').resolve('./') + '/public/uploads/' + newImageName;
+
+            imageUploadFile.mv(uploadPath, function(err) {
+                if (err) {
+                    return res.status(500).send(err);
+                }
+            });
+        }
+
+        const newRecipe = new Recipe(
+            {
+                email: req.body.email,
+                name: req.body.name,
+                description: req.body.description,
+                ingredients: req.body.ingredients,
+                category: req.body.category,
+                image: newImageName,
+            }
+        );
+
+        await newRecipe.save();
+
+        req.flash('infoSubmit', 'Votre recette a bien été soumise, elle sera publiée après validation par un administrateur. Merci !')
+        res.redirect('/submit-recipe');
+    } catch (error) {
+        req.flash('infoErrors', "Erreur : " +error.message)
+        res.redirect('/submit-recipe');
+    }
+    
+    
+}
 
 
 
