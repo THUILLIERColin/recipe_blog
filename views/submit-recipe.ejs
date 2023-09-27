@@ -27,7 +27,7 @@
         </div>
         <div class="col-12">
           <label for="name" class="form-label">Titre de la recette</label>
-          <input type="text" name="name" id="name" class="form-control" />
+          <input type="text" name="name" id="name" class="form-control" required />
         </div>
 
         <div class="col-12">
@@ -38,6 +38,7 @@
             class="form-control"
             cols="30"
             rows="4"
+            required
           ></textarea>
         </div>
         <div class="col-12">
@@ -45,7 +46,7 @@
           <small>Example: Ice</small>
           <div class="ingredientList">
             <div class="ingredientDiv mb-1">
-              <input type="text" name="ingredients" class="form-control" />
+              <input type="text" name="ingredients" class="form-control" required />
             </div>
           </div>
         </div>
@@ -64,6 +65,7 @@
             class="form-select form-control"
             name="category"
             aria-label="Category"
+            required
           >
             <option selected disabled>Choisissez une catégorie</option>
             <% if (categories) { %> <% categories.forEach(function(category) {
@@ -79,6 +81,7 @@
             class="form-control"
             name="image"
             accept="image/*"
+            required
           />
         </div>
         <div class="col-12">
