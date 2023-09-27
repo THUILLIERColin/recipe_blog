@@ -27,9 +27,14 @@
 
             <ul cLass="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
                 <li><a href="/" cLass="nav-link px-2 link-secondary">Home</a></li>
-                <li><a href="/about" cLass="nav-link px-2 link-dark">&Agrave propos</a></li>
-                <li><a href="/submit-recipe" cLass="nav-link px-2 link-dark">Nouvelle recette</a></li>
-                <li><a href="/categories" cLass="nav-link px-2 link-dark">Voir catégories</a></li>
+                <li><a href="/categories" cLass="nav-link px-2 link-dark">Catégories</a></li>
+                <% if(session.user){ %>
+                    <li><a href="/submit-recipe" cLass="nav-link px-2 link-dark">Nouvelle recette</a></li>
+                    <li><a href="/register" cLass="nav-link px-2 link-dark">Inscrire</a></li>
+                    <li><a href="/logout" cLass="nav-link px-2 link-dark">Se déconnecter</a></li>
+                <% } else { %>
+                    <li><a href="/login" cLass="nav-link px-2 link-dark">Se connecter</a></li>
+                <% } %>
             </ul>
 
             <div class="col-md-3 text-end">

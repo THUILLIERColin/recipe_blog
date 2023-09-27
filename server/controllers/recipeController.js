@@ -1,6 +1,8 @@
 require('../models/database');
 const Category = require('../models/Category');
 const Recipe = require('../models/Recipe');
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 /**
  * GET /
@@ -19,7 +21,8 @@ exports.homepage = async (req, res) => {
         res.render('index', { 
             title : 'Accueil',
             categories,
-            food
+            food, 
+            session: req.session
         });
     } catch (error) {
         res.status(500).send({ message : error.message || "Erreur inconue"});
@@ -36,7 +39,8 @@ exports.exploreCategories = async (req, res) => {
         const categories = await Category.find().limit(limitNumber);
         res.render('categories', { 
             title : 'Catégories',
-            categories
+            categories,
+            session: req.session
         });
     } catch (error) {
         res.status(500).send({ message : error.message || "Erreur inconue"});
@@ -52,7 +56,8 @@ exports.myRecipe = async (req, res) => {
         const recipe = await Recipe.findById(req.params.id);
         res.render('recipe', { 
             title : 'Recette',
-            recipe
+            recipe,
+            session: req.session
         });
     } catch (error) {
         res.render('layouts/404');
@@ -70,7 +75,7 @@ exports.exploreCategoriesById = async(req, res) => {
         let categoryId = req.params.id;
         const limitNumber = 20;
         const categoryById = await Recipe.find({ 'category': categoryId }).limit(limitNumber);
-        res.render('categories', { title: 'Catégories', categoryById, categoryId} );
+        res.render('categories', { title: 'Catégories', categoryById, categoryId, session: req.session } );
     } catch (error) {
         res.render('layouts/404');
     }
@@ -84,7 +89,7 @@ exports.searchRecipe = async(req, res) => {
   try {
     let searchTerm = req.body.searchTerm;
     let recipe = await Recipe.find( { $text: { $search: searchTerm, $diacriticSensitive: true } });
-    res.render('search', { title: 'Cooking Blog - Search', recipe } );
+    res.render('search', { title: 'Cooking Blog - Search', recipe, session: req.session } );
   } catch (error) {
     res.status(500).json(error)
   }
@@ -98,7 +103,7 @@ exports.exploreLatest = async(req, res) => {
     try {
         const limitNumber = 20;
         const latest = await Recipe.find().sort({ _id: -1 }).limit(limitNumber);
-        res.render('explore-latest', { title: 'Cooking Blog - Explore Latest', latest } );
+        res.render('explore-latest', { title: 'Cooking Blog - Explore Latest', latest, session: req.session } );
     } catch (error) {
         res.status(500).json(error)
     }
@@ -113,7 +118,7 @@ exports.randomRecipe = async(req, res) => {
         let count = await Recipe.find().countDocuments();
         let random = Math.floor(Math.random() * count);
         const recipe = await Recipe.findOne().skip(random).exec();
-        res.render('recipe', { title: 'Cooking Blog - Explore Random', recipe } );
+        res.render('recipe', { title: 'Cooking Blog - Explore Random', recipe, session: req.session } );
     } catch (error) {
         res.status(500).json(error)
     }
@@ -126,10 +131,15 @@ exports.randomRecipe = async(req, res) => {
  */
 exports.submitRecipe = async(req, res) => {
     try {
+        if(req.session.user === false) {
+            req.flash('infoErrors', "Erreur : Vous devez être connecté pour soumettre une recette")
+            return res.redirect('/login');
+        }
         const infoErrorsObj = req.flash('infoErrors');
         const infoSubmitObj = req.flash('infoSubmit');
         const categories = await Category.find();
-        res.render('submit-recipe', { title: 'Cooking Blog - Submit Recipe', categories, infoErrorsObj, infoSubmitObj } );
+        console.log('session', req.session)
+        res.render('submit-recipe', { title: 'Cooking Blog - Submit Recipe', categories, infoErrorsObj, infoSubmitObj, session: req.session } );
     } catch (error) {
         res.status(500).json(error)
     }
@@ -141,7 +151,10 @@ exports.submitRecipe = async(req, res) => {
  */
 exports.submitRecipePost = async(req, res) => {
     try {
-
+        if(req.session.user === false) {
+            req.flash('infoErrors', "Erreur : Vous devez être connecté pour soumettre une recette")
+            return res.redirect('/login');
+        }
         // On verifie si l'utilisateur a bien envoyé toutes les données requises
         if (!req.body.name || !req.body.description || !req.body.ingredients || !req.body.category) {
             req.flash('infoErrors', "Erreur : Veuillez remplir tous les champs obligatoires")
@@ -208,5 +221,124 @@ async function deleteRecipe() {
         const res = await Recipe.deleteOne({name: 'Stir-fried vegetables Updated'});
     }catch (error) {
         console.log('err', + error)
+    }
+}
+
+/**
+ * GET /register
+ * Register
+ */
+exports.register = async(req, res) => {
+    try {
+        if(!req.session.user) {
+            return res.redirect('/');
+        }
+        const infoErrorsObj = req.flash('infoErrorsRegister');
+        const infoSubmitObj = req.flash('infoSubmitRegister');
+        res.render('register', { title: 'Cooking Blog - Register', infoErrorsObj, infoSubmitObj, session: req.session } );
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+/**
+ * GET /login
+ * Login
+ */
+exports.login = async(req, res) => {
+    try {
+        const infoErrorsObj = req.flash('infoErrorsLogin');
+        const infoSubmitObj = req.flash('infoSubmitLogin');
+        res.render('login', { title: 'Cooking Blog - Login', infoErrorsObj, infoSubmitObj, session: req.session } );
+    } catch (error) {
+        res.status(500).json(error)
+    }
+}
+
+/**
+ * POST /register
+ * Register
+ */
+exports.submitRegister = async(req, res) => {
+    try {
+
+        // On verifier que l'utilisateur est connecté pour bloquer l'accès à la page
+        if(!req.session.user) {
+            return res.redirect('/');
+        }
+
+        // On verifie si l'utilisateur a bien envoyé toutes les données requises
+        if (!req.body.name || !req.body.email || !req.body.password) {
+            req.flash('infoErrorsRegister', "Erreur : Veuillez remplir tous les champs")
+            console.log('req.body', req.body)
+            return res.redirect('/register');
+        }
+
+        // On verifie si l'utilisateur existe déjà
+        if(await User.findOne({ name: req.body.name })) {
+            req.flash('infoErrorsRegister', "Erreur : Un utilisateur existe déjà avec ce nom")
+            return res.redirect('/register');
+        }
+
+        const newUser = new User(
+            {
+                name: req.body.name,
+                email: req.body.email,
+                password: req.body.password,
+            }
+        );
+
+        console.log('newUser', newUser)
+        
+        await newUser.save();
+            
+        req.flash('infoSubmitRegister', 'Votre compte a bien été créé, vous pouvez maintenant vous connecter')
+        res.redirect('/register');
+    } catch (error) {
+        req.flash('infoErrorsRegister', "Erreur : " +error.message)
+        res.redirect('/register');
+    }
+}
+
+/**
+ * POST /login
+ * Login
+ */
+exports.submitLogin = async(req, res) => {
+    try {
+        const res = await User.findOne({ name: req.body.name });
+
+        if (!res) {
+            req.flash('infoErrorsLogin', "Erreur : Aucun utilisateur trouvé avec cet email")
+            return res.redirect('/login');
+        }
+        if (! await bcrypt.compare(req.body.password, res.password)) {
+            console.log('req.body.password', req.body.password)
+            console.log('res.password', res.password)
+            req.flash('infoErrorsLogin', "Erreur : Mot de passe incorrect")
+            return res.redirect('/login');
+        }
+        req.session.user = true;
+        req.session.name = res.name;
+        console.log('req.session', req.session)
+        return res.redirect('/');
+    } catch (error) {
+        req.flash('infoErrorsLogin', "Erreur : " +error.message)
+        return res.redirect('/login');
+    }
+}
+
+/**
+ * GET /logout
+ * Logout
+ */
+exports.logout = async(req, res) => {
+    try {
+        req.session.user = false;
+        req.session.name = null;
+        console.log('req.session', req.session)
+        res.redirect('/');
+    } catch (error) {
+        res.status(500).json(error)
     }
 }

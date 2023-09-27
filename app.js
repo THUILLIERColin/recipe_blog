@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 
-app.use(express.urlencoded( { extended: true } ));
+app.use(express.urlencoded( { extended: false } ));
 app.use(express.static('public'));
 app.use(expressLayouts);
 
@@ -30,4 +30,5 @@ app.set('view engine', 'ejs');
 const routes = require('./server/routes/recipeRoutes.js');
 app.use('/', routes);
 
+session.user = false;
 app.listen(port, () => console.log(`Listening on port ${port}`));
