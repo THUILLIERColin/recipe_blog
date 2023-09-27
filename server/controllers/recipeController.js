@@ -191,57 +191,22 @@ exports.submitRecipePost = async(req, res) => {
     
 }
 
+// Update Recipe
+async function updateRecipe() {
+    try {
+        const res = await Recipe.updateOne({name: 'Stir-fried vegetables'}, {name: 'Stir-fried vegetables Updated'});
+        res.n; // Number of documents matched
+        res.nModified; // Number of documents modified
+    }catch (error) {
+        console.log('err', + error)
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Dummy Data Example 
-*/
-
-// async function insertDymmyCategoryData(){
-//   try {
-//     await Category.insertMany([
-//       {
-//         "name": "Thai",
-//         "image": "thai-food.jpg"
-//       },
-//       {
-//         "name": "American",
-//         "image": "american-food.jpg"
-//       }, 
-//       {
-//         "name": "Chinese",
-//         "image": "chinese-food.jpg"
-//       },
-//       {
-//         "name": "Mexican",
-//         "image": "mexican-food.jpg"
-//       }, 
-//       {
-//         "name": "Indian",
-//         "image": "indian-food.jpg"
-//       },
-//       {
-//         "name": "Spanish",
-//         "image": "spanish-food.jpg"
-//       }
-//     ]);
-//   } catch (error) {
-//     console.log('err', + error)
-//   }
-// }
-
-// insertDymmyCategoryData();
+// Delete Recipe
+async function deleteRecipe() {
+    try {
+        const res = await Recipe.deleteOne({name: 'Stir-fried vegetables Updated'});
+    }catch (error) {
+        console.log('err', + error)
+    }
+}
