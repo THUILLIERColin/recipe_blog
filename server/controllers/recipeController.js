@@ -142,13 +142,19 @@ exports.submitRecipe = async(req, res) => {
 exports.submitRecipePost = async(req, res) => {
     try {
 
+        // On verifie si l'utilisateur a bien envoyé toutes les données requises
+        if (!req.body.name || !req.body.description || !req.body.ingredients || !req.body.category) {
+            req.flash('infoErrors', "Erreur : Veuillez remplir tous les champs obligatoires")
+            return res.redirect('/submit-recipe');
+        }
+
         let imageUploadFile;
         let uploadPath; 
         let newImageName;
 
         if (!req.files || Object.keys(req.files).length === 0) {
             req.flash('infoErrors', "Erreur : Aucun fichier n'a été envoyé")
-            // return res.redirect('/submit-recipe');
+            return res.redirect('/submit-recipe');
         } else {
             imageUploadFile = req.files.image;
             newImageName = Date.now() + imageUploadFile.name;
