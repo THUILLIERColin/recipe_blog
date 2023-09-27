@@ -17,8 +17,9 @@ app.use(expressLayouts);
 app.use(cookieParser('CookingBlogSecure'));
 app.use(session({
     secret: 'CookingBlogSecretSession',
-    saveUninitialized: true,
-    resave: true
+    saveUninitialized: false,
+    resave: false, 
+    user: false,
 }));
 app.use(flash());
 app.use(fileUpload());
@@ -30,5 +31,4 @@ app.set('view engine', 'ejs');
 const routes = require('./server/routes/recipeRoutes.js');
 app.use('/', routes);
 
-session.user = false;
 app.listen(port, () => console.log(`Listening on port ${port}`));

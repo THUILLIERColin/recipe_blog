@@ -138,7 +138,8 @@ exports.submitRecipe = async(req, res) => {
         const infoErrorsObj = req.flash('infoErrors');
         const infoSubmitObj = req.flash('infoSubmit');
         const categories = await Category.find();
-        console.log('session', req.session)
+        console.log('session.user', req.session.user)
+        console.log('session.name', req.session.name)
         res.render('submit-recipe', { title: 'Cooking Blog - Submit Recipe', categories, infoErrorsObj, infoSubmitObj, session: req.session } );
     } catch (error) {
         res.status(500).json(error)
@@ -270,7 +271,6 @@ exports.submitRegister = async(req, res) => {
         // On verifie si l'utilisateur a bien envoyé toutes les données requises
         if (!req.body.name || !req.body.email || !req.body.password) {
             req.flash('infoErrorsRegister', "Erreur : Veuillez remplir tous les champs")
-            console.log('req.body', req.body)
             return res.redirect('/register');
         }
 
@@ -286,10 +286,7 @@ exports.submitRegister = async(req, res) => {
                 email: req.body.email,
                 password: req.body.password,
             }
-        );
-
-        console.log('newUser', newUser)
-        
+        );        
         await newUser.save();
             
         req.flash('infoSubmitRegister', 'Votre compte a bien été créé, vous pouvez maintenant vous connecter')
@@ -313,14 +310,11 @@ exports.submitLogin = async(req, res) => {
             return res.redirect('/login');
         }
         if (! await bcrypt.compare(req.body.password, res.password)) {
-            console.log('req.body.password', req.body.password)
-            console.log('res.password', res.password)
             req.flash('infoErrorsLogin', "Erreur : Mot de passe incorrect")
             return res.redirect('/login');
         }
         req.session.user = true;
         req.session.name = res.name;
-        console.log('req.session', req.session)
         return res.redirect('/');
     } catch (error) {
         req.flash('infoErrorsLogin', "Erreur : " +error.message)
@@ -336,7 +330,6 @@ exports.logout = async(req, res) => {
     try {
         req.session.user = false;
         req.session.name = null;
-        console.log('req.session', req.session)
         res.redirect('/');
     } catch (error) {
         res.status(500).json(error)
