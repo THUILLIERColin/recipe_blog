@@ -48,3 +48,6 @@ a {
     object-fit: cover;
 }
 
+#favorite {
+    cursor: pointer;
+}

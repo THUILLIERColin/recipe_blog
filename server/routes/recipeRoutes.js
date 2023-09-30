@@ -19,6 +19,7 @@ router.get('/register', recipeController.register);
 router.post('/register', recipeController.submitRegister);
 router.post('/login', recipeController.submitLogin);
 router.get('/logout', recipeController.logout);
+router.post('/add-to-favorites/:id', recipeController.addToFavorites);
 
 // Erreur 404 chargement de la page 404.ejs
 

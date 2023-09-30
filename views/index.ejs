@@ -74,19 +74,30 @@
   </div>
 
   <div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
-    <% if (food !=''){ %> <% food.latest.forEach(function(recipe, index){ %>
-    <a href="/recipe/<%= recipe._id %>" class="col text-center category__link mb-4">
-      <div class="category__img category__img--large shadow">
-        <img
-          src="/uploads/<%= recipe.image %>"
-          alt="<%= recipe.name %>"
-          loading="lazy"
-          width="100%"
-          height="100%"
-        />
-      </div>
-      <div class="pt-1"><%= recipe.name %></div>
-    </a>
+    <% if (typeof food.latest !== 'undefined' && food.latest.length > 0 !=''){ %> <% food.latest.forEach(function(recipe, index){ %>
+      <div class="col text-center category__link mb-4">      
+        <a href="/recipe/<%= recipe._id %>" class="col text-center category__link mb-4">
+        <div class="category__img category__img--large shadow">
+          <img
+            src="/uploads/<%= recipe.image %>"
+            alt="<%= recipe.name %>"
+            loading="lazy"
+            width="100%"
+            height="100%"
+          />
+        </div>
+        <div class="pt-1"><%= recipe.name %></div>
+      </a>
+      <% if (session.user){ %>
+        <% if (typeof session.favorites !== 'undefined' && session.favorites.includes(String(recipe._id))){ %>
+          <input type="hidden btn" id="favorite" value="true" onclick="addFavorite()">
+          <i class="bi bi-heart-fill" style="color: red;" data-recipe-id="<%= recipe._id %>" id="favorite"></i>
+          </input>
+        <% } else { %>
+          <i class="bi bi-heart" data-recipe-id="<%= recipe._id %>" id="favorite"></i>
+        <% } %>
+      <% } %>
+    </div>
     <% }) %> <% } %>
   </div>
 </section>
@@ -94,6 +105,32 @@
 <!-- Latest Recipes End -->
 
 <!-- Liked Recipes Start -->
+
+<% if(session.user){ %>
+  <section class="pd-4 pt-4">
+    <div class="d-flex mb-2 align-items-center">
+      <h2>Recettes aimées</h2>
+      <a href="/explore-liked" class="ms-auto">View All</a>
+    </div>
+
+    <div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
+      <% if (typeof food.favorites !== 'undefined' && food.favorites.length > 0){ %> <% food.favorites.forEach(function(recipe, index){ %>
+      <a href="/recipe/<%= recipe._id %>" class="col text-center category__link mb-4">
+        <div class="category__img category__img--large shadow">
+          <img
+            src="/uploads/<%= recipe.image %>"
+            alt="<%= recipe.name %>"
+            loading="lazy"
+            width="100%"
+            height="100%"
+          />
+        </div>
+        <div class="pt-1"><%= recipe.name %></div>
+      </a>
+      <% }) %> <% } %>
+    </div>
+  </section>
+<% } %>
 
 <!-- Liked Recipes End -->
 
@@ -120,3 +157,5 @@
 </section>
 
 Submit - End -->
+
+<script src="/js/addFavorite.js"></script>

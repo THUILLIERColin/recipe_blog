@@ -11,13 +11,21 @@ const bcrypt = require('bcrypt');
 exports.homepage = async (req, res) => {
     try {
         
-        const limitNumber = 15; 
+        const limitNumber = 10; 
         const limitNumberCategory = 5;
         const categories = await Category.find().sort({ _id: -1 }).limit(limitNumberCategory);
         const latest = await Recipe.find().sort({ _id: -1 }).limit(limitNumber);
 
         const food = { latest };
-    
+
+        if(req.session.user) {
+            const user = await User.findOne({ name: req.session.name });
+            console.log('user', user);
+            // On récupère les recettes favorites de l'utilisateur
+            const favorites = await Recipe.find({ _id: { $in: user.favorites } }).limit(limitNumber);
+            food.favorites = favorites;
+        }
+
         res.render('index', { 
             title : 'Accueil',
             categories,
@@ -201,8 +209,6 @@ exports.submitRecipePost = async(req, res) => {
         req.flash('infoErrors', "Erreur : " +error.message)
         res.redirect('/submit-recipe');
     }
-    
-    
 }
 
 // Update Recipe
@@ -303,18 +309,19 @@ exports.submitRegister = async(req, res) => {
  */
 exports.submitLogin = async(req, res) => {
     try {
-        const res = await User.findOne({ name: req.body.name });
+        const user = await User.findOne({ name: req.body.name });
 
-        if (!res) {
+        if (!user) {
             req.flash('infoErrorsLogin', "Erreur : Aucun utilisateur trouvé avec cet email")
             return res.redirect('/login');
         }
-        if (! await bcrypt.compare(req.body.password, res.password)) {
+        if (! await bcrypt.compare(req.body.password, user.password)) {
             req.flash('infoErrorsLogin', "Erreur : Mot de passe incorrect")
             return res.redirect('/login');
         }
         req.session.user = true;
-        req.session.name = res.name;
+        req.session.name = user.name;
+        req.session.favorites = user.favorites;
         return res.redirect('/');
     } catch (error) {
         req.flash('infoErrorsLogin', "Erreur : " +error.message)
@@ -335,3 +342,45 @@ exports.logout = async(req, res) => {
         res.status(500).json(error)
     }
 }
+
+/**
+ * POST /add-to-favorites/:id
+ * Add to favorites
+ */
+exports.addToFavorites = async(req, res) => {
+    try {
+        if(!req.session.user) {
+            return res.redirect('/login');
+        }
+        const recipe = await Recipe.findById(req.params.id);
+        // On verifie si la recette existe et on l'ajoute aux favoris de l'utilisateur
+        if(recipe) {
+            const user = await User.findOne({ name: req.session.name });
+            user.favorites.push(recipe._id);
+            await user.save();
+            return res.redirect('/recipe/' + req.params.id);
+        }
+
+    } catch (error) {
+        res.render('layouts/404');
+        // res.status(500).send({ message : error.message || "Erreur inconue"});
+    }
+}
+
+// Add user 
+// async function addUser() {
+//     try {
+//         const newUser = new User(
+//             {
+//                 name:'tmp',
+//                 password: 'tmp',
+//             }
+//         );
+//         await newUser.save();
+//         console.log('Utilisateur ajouté');
+//     }
+//     catch (error) {
+//         console.log('err', + error)
+//     }
+// }
+// addUser();
